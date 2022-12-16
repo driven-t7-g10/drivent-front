@@ -1,3 +1,130 @@
+import styled from 'styled-components';
+import { useState } from 'react';
+
 export default function Payment() {
-  return 'Pagamento: Em breve!';
+  const [presentialCollor, setPresentialCollor] = useState('white');
+  const [onlineCollor, setOnlineCollor] = useState('white');
+  const [select, setSelect] = useState('');
+  return (
+    <Container>
+      <h1>Ingresso e pagamento</h1>
+      <div className="ticket_container">
+        <h2 className='text_about_options'>Primeiro, escolha sua modalidade de ingresso</h2>
+        <div className="modality_container">
+          <Ticket_modality_presential
+            collor = {presentialCollor}
+            onClick={() => { clickInPresential(); }}
+          >
+            <p>presencial</p>
+          </Ticket_modality_presential>
+
+          <Ticket_modality_online
+            collor={onlineCollor}
+            onClick={() => { clickInOnline(); }}
+          >
+            <p>online</p>
+          </Ticket_modality_online>
+        </div>
+        
+      </div>
+      
+    </Container> 
+  );
+
+  function clickInOnline() {
+    if (onlineCollor === 'white' && presentialCollor === 'white') {
+      setOnlineCollor('#FFEED2');
+      setSelect('online');
+    } else if (onlineCollor === 'white' && presentialCollor !== 'white') {
+      setOnlineCollor('#FFEED2');
+      setPresentialCollor('white');
+      setSelect('online');
+    } else if (onlineCollor !== 'white' && presentialCollor === 'white') {
+      setOnlineCollor('white');
+      setSelect('');
+    }
+  }
+
+  function clickInPresential() {
+    if (onlineCollor === 'white' && presentialCollor === 'white') {
+      setPresentialCollor('#FFEED2');
+      setSelect('presential');
+    } else if (onlineCollor !== 'white' && presentialCollor === 'white') {
+      setOnlineCollor('white');
+      setPresentialCollor('#FFEED2');
+      setSelect('presential');
+    } else if (onlineCollor === 'white' && presentialCollor !== 'white') {
+      setPresentialCollor('white');
+      setSelect('');
+    }
+  }
 }
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  h1{
+    font-family: 'Roboto',sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 40px;
+    color: #000000;
+  }
+
+  h2{
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 23px;
+    color: #8E8E8E;
+  }
+
+  .text_about_options{
+      margin: 37px 0 17px 0;
+  }
+
+  .ticket_container{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modality_container{
+    display: flex;
+  }
+
+`;
+
+const Ticket_modality_presential = styled.div`
+  box-sizing: border-box;
+
+  width: 145px;
+  height: 145px;
+
+  border: 1px solid #CECECE;
+  border-radius: 20px;
+  margin-right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: ${props => props.collor};
+`;
+
+const Ticket_modality_online = styled.div`
+  box-sizing: border-box;
+
+  width: 145px;
+  height: 145px;
+
+  border: 1px solid #CECECE;
+  border-radius: 20px;
+  margin-right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: ${props => props.collor};
+`;
