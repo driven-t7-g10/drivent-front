@@ -8,7 +8,7 @@ export default function Payment() {
   const [ticket, setTicket] = useState([]);
   let ticketType;
   let ticketPrice;
-  const [cvc, setCvc] = useState('');
+  const [cvv, setCvv] = useState('');
   const [expiry, setExpiry] = useState('');
   const [focus, setFocus] = useState('');
   const [name, setName] = useState('');
@@ -58,15 +58,15 @@ export default function Payment() {
         <div className='cardInf'>
           <Cards
             style={{ width: '10px' }}
-            cvc={cvc}
+            cvc={cvv}
             expiry={expiry}
             focused={focus}
-            name={'lucas felipe'}
+            name={name}
             number={number}
           />
           <div className='cardForm'>
             <input
-              type="number" name="input"
+              type="text" name="input"
               placeholder="Card Number"
               value={number}
               onChange={
@@ -74,17 +74,37 @@ export default function Payment() {
               }
             />
             <input
-              type="number" name="input"
-              placeholder="Card Number"
-              value={number}
+              type="text" name="input"
+              placeholder="Name"
+              value={name}
               onChange={
-                e => setNumber(e.target.value)
+                e => setName(e.target.value)
               }
             />
+          
+            <div className="valid-cvv">
+              <input
+                type="text"
+                className="valid"
+                placeholder="Valid Thru"
+                value={expiry}
+                onChange={
+                  e => setExpiry(e.target.value)
+                }
+              />
+              <input
+                type="text"
+                className="cvv"
+                placeholder="CVV"
+                value={cvv}
+                onChange={
+                  e => setCvv(e.target.value)
+                }
+              />
+            </div>
           </div>
         </div>
         
-        <p>testando</p>
       </PaymentCardContainer>
       
     </Container> 
@@ -177,5 +197,33 @@ flex-direction: column;
   }
   .rccs{
     margin-left: 0;
+    margin-right: 25px;
+  }
+  .cardInf{
+    display: flex;
+  }
+  .cardForm{
+    display: flex;
+    flex-direction: column;
+    height: 182px;
+    justify-content: space-between;
+
+    input{
+      width: 350px;
+      height: 46px;
+
+      border: 1.5px solid #8E8E8E;
+      border-radius: 5px;
+    }
+    .valid-cvv{
+      display: flex;
+      justify-content: space-between;
+      .cvv{
+        width: 118px;
+      }
+      .valid{
+        width: 214px;
+      }
+    }
   }
 `;
