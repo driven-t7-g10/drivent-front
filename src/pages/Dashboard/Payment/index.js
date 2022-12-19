@@ -1,13 +1,10 @@
 import styled from 'styled-components';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 
 export default function Payment() {
   const [presentialCollor, setPresentialCollor] = useState('white');
   const [onlineCollor, setOnlineCollor] = useState('white');
   const [select, setSelect] = useState('');
-
-  console.log(select);
 
   return (
     <Container>
@@ -16,7 +13,7 @@ export default function Payment() {
         <h2 className='text_about_options'>Primeiro, escolha sua modalidade de ingresso</h2>
         <div className="modality_container">
           <Ticket_modality_presential
-            collor = {presentialCollor}
+            collor={presentialCollor}
             onClick={() => { clickInPresential(); }}
           >
             <p>presencial</p>
@@ -31,10 +28,13 @@ export default function Payment() {
             <p className='price'>R$ 200</p>
           </Ticket_modality_online>
         </div>
-        
       </div>
-      
-    </Container> 
+      {select === 'online' ?
+        <TicketModality>
+          <div>Fechado! O total ficou em <strong className='confirmationButton'>R$ 100</strong>. Agora é só confirmar:</div>
+          <Button>RESERVAR INGRESSO</Button>
+        </TicketModality> : <TicketModality>presencial</TicketModality>}
+    </Container>
   );
 
   function clickInOnline() {
@@ -105,10 +105,8 @@ const Container = styled.div`
 
 const Ticket_modality_presential = styled.div`
   box-sizing: border-box;
-
   width: 145px;
   height: 145px;
-
   border: 1px solid #CECECE;
   border-radius: 20px;
   margin-right: 24px;
@@ -183,4 +181,27 @@ const Ticket_modality_online = styled.div`
 
     color: #454545;
   }
+`;
+
+const TicketModality = styled.div`
+margin-top: 37px;
+color: #8E8E8E;
+display: flex;
+flex-direction: column;
+`;
+
+const Button = styled.button`
+width: 162px;
+height: 37px;
+margin-top: 17px;
+border: none;
+background: #E0E0E0;
+box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+border-radius: 4px;
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 16px;
+text-align: center;
 `;
