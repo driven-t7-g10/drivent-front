@@ -2,15 +2,20 @@ import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import useToken from '../../../hooks/useToken';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function Payment() {
   const [presentialCollor, setPresentialCollor] = useState('white');
   const [onlineCollor, setOnlineCollor] = useState('white');
   const [select, setSelect] = useState('');
 
+  const navigate = useNavigate();
+
   const [ticket, setTicket] = useState([]);
 
   const token = useToken();
+
+  const server_url = process.env.REACT_APP_SERVER_URL;
 
   useEffect(() => {
     axios
@@ -22,17 +27,21 @@ export default function Payment() {
       .then((response) => {setTicket(response.data);});
   }, []);
 
+  console.log(ticket);
+
   if (ticket.length === 0) return null;
 
   let presential;
   let presentialPrice;
   let online;
   let onlinePrice;
+  let onlineId;
   
   for (let i = 0; i < ticket.length; i++) {
     if (ticket[i].name === 'online') {
       online = ticket[i].name;
-      onlinePrice = ticket[i].price/100;
+      onlinePrice = ticket[i].price / 100;
+      onlineId = ticket[i].id;
     } else {
       presential = ticket[i].name;
       presentialPrice = ticket[i].price/100;
@@ -65,7 +74,18 @@ export default function Payment() {
       {select === 'online' ?
         <TicketModality>
           <div>Fechado! O total ficou em <strong className='confirmationButton'>{onlinePrice}</strong>. Agora é só confirmar:</div>
-          <Button>RESERVAR INGRESSO</Button>
+          <Button onClick={() => {
+            axios
+              .post('http://localhost:4000/tickets', {
+                ticketTypeId: onlineId
+              }, {
+                headers: {
+                  Authorization: 'Bearer ' + token,
+                },
+              }).then((response) => {
+                navigate('/dashboard/payment/data');
+              });
+          }}>RESERVAR INGRESSO</Button>
         </TicketModality> : <TicketModality>presencial</TicketModality>}
     </Container>
   );

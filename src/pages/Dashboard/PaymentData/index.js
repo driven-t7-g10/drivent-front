@@ -8,21 +8,19 @@ import useToken from '../../../hooks/useToken';
 
 export default function Payment() {
   const [ticket, setTicket] = useState([]);
-  let ticketType;
-  let ticketPrice;
   const [cvv, setCvv] = useState('');
   const [expiry, setExpiry] = useState('');
   const [focus, setFocus] = useState('');
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-  const [opacity, setOpacity] = useState('1');
   const [hide, setHide] = useState('clear');
+  const[issuer, setIssuer] = useState('');
 
   const token = useToken();
 
   useEffect(() => {
     axios
-      .get('/tickets/types', {
+      .get('http://localhost:4000/tickets', {
         headers: {
           Authorization: 'Bearer ' + token,
         },
@@ -30,25 +28,7 @@ export default function Payment() {
       .then((response) => {setTicket(response.data);});
   }, []);
 
-  console.log('ticket: ', ticket);
-
-  if(!ticket.data) {
-    ticketType = 'nao conectado ao banco';
-    ticketPrice = 'sem conexão';
-  } else {
-    if (ticket.data.TicketType.isRemote === true) {
-      ticketType = 'Online';
-      ticketPrice = ticket.data.TicketType.price/100;
-    } else if (ticket.data.TicketType.isRemote === false) {
-      if (ticket.data.TicketType.includesHotel === true) {
-        ticketType = 'Presencial + Hotel';
-        ticketPrice = ticket.data.TicketType.price/100;
-      } else {
-        ticketType = 'Presencial';
-        ticketPrice = ticket.data.TicketType.price/100;
-      }
-    }
-  }
+  if (ticket.length === 0) return null;
   
   return (
     <Container>
@@ -57,8 +37,8 @@ export default function Payment() {
         <h2 className='text_about_options'>Ingresso escolhido</h2>
         <div className="modality_container">
           <div className="ticket">
-            <h1>{ticketType}</h1>
-            <p>{ticketPrice}</p>
+            <h1>{ticket.TicketType.name}</h1>
+            <p>{ticket.TicketType.price}</p>
           </div>
         </div>
       </div>
@@ -73,6 +53,8 @@ export default function Payment() {
             focused={focus}
             name={name}
             number={number}
+            callback={handleCallback}
+
           />
           <div className='cardForm'>
             <input
@@ -130,10 +112,35 @@ export default function Payment() {
 
   function sendPayment() {
     if (cvv.length === 3 && name.length !== 0 && number.length === 16 && expiry.length === 6) {
-      console.log('ok');
+      console.log(issuer);
+      const body = {
+        issuer: issuer,
+        number: number,
+        name: name,
+        expirationDate: `${expiry[0]}${expiry[1]}/${expiry[2]}${expiry[3]}${expiry[4]}${expiry[5]}`,
+        cvv: cvv,
+      };
+      console.log(body);
+
+      axios
+        .post('http://localhost:4000/payments/process', {
+          ticketId: ticket.id,
+          cardData: body
+        }, {
+          headers: {
+            Authorization: 'Bearer ' + token,
+          },
+        }).then((response) => {
+          console.log('foi');
+        });
     } else {
       setHide('');
+      console.log('eita');
     }
+  }
+
+  function handleCallback({ issuer }) {
+    setIssuer((issuer).toUpperCase());
   }
 }
 
