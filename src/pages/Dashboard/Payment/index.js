@@ -1,10 +1,43 @@
 import styled from 'styled-components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import useToken from '../../../hooks/useToken';
+import axios from 'axios';
 
 export default function Payment() {
   const [presentialCollor, setPresentialCollor] = useState('white');
   const [onlineCollor, setOnlineCollor] = useState('white');
   const [select, setSelect] = useState('');
+
+  const [ticket, setTicket] = useState([]);
+
+  const token = useToken();
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:4000/tickets/types', {
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+      })
+      .then((response) => {setTicket(response.data);});
+  }, []);
+
+  if (ticket.length === 0) return null;
+
+  let presential;
+  let presentialPrice;
+  let online;
+  let onlinePrice;
+  
+  for (let i = 0; i < ticket.length; i++) {
+    if (ticket[i].name === 'online') {
+      online = ticket[i].name;
+      onlinePrice = ticket[i].price/100;
+    } else {
+      presential = ticket[i].name;
+      presentialPrice = ticket[i].price/100;
+    }
+  }
 
   return (
     <Container>
@@ -16,22 +49,22 @@ export default function Payment() {
             collor={presentialCollor}
             onClick={() => { clickInPresential(); }}
           >
-            <p>presencial</p>
-            <p className='price'>R$ 250</p>
+            <p>{presential}</p>
+            <p className='price'>R$ R$ {' ' + presentialPrice}</p>
           </Ticket_modality_presential>
 
           <Ticket_modality_online
             collor={onlineCollor}
             onClick={() => { clickInOnline(); }}
           >
-            <p>online</p>
-            <p className='price'>R$ 200</p>
+            <p>{online}</p>
+            <p className='price'>R$ R$ {' ' + onlinePrice}</p>
           </Ticket_modality_online>
         </div>
       </div>
       {select === 'online' ?
         <TicketModality>
-          <div>Fechado! O total ficou em <strong className='confirmationButton'>R$ 100</strong>. Agora é só confirmar:</div>
+          <div>Fechado! O total ficou em <strong className='confirmationButton'>{onlinePrice}</strong>. Agora é só confirmar:</div>
           <Button>RESERVAR INGRESSO</Button>
         </TicketModality> : <TicketModality>presencial</TicketModality>}
     </Container>
@@ -127,6 +160,10 @@ const Ticket_modality_presential = styled.div`
     text-align: center;
 
     color: #454545;
+
+    :hover {
+      cursor: pointer;
+    }
   }
 
   .price{
@@ -181,6 +218,10 @@ const Ticket_modality_online = styled.div`
 
     color: #454545;
   }
+
+  :hover {
+    cursor: pointer;
+  }  
 `;
 
 const TicketModality = styled.div`
