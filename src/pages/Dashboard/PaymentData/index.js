@@ -4,6 +4,8 @@ import axios from 'axios';
 import Cards from 'react-credit-cards';
 import 'react-credit-cards/es/styles-compiled.css';
 
+import useToken from '../../../hooks/useToken';
+
 export default function Payment() {
   const [ticket, setTicket] = useState([]);
   let ticketType;
@@ -13,14 +15,22 @@ export default function Payment() {
   const [focus, setFocus] = useState('');
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const [opacity, setOpacity] = useState('1');
+  const [hide, setHide] = useState('clear');
+
+  const token = useToken();
 
   useEffect(() => {
-    const request = axios.get('/tickets');
-    request.then(setTicket(request)).catch(() => {
-      ticketType = 'nao conectado ao banco';
-      ticketPrice = 'sem conexão';
-    });
+    axios
+      .get('/tickets/types', {
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+      })
+      .then((response) => {setTicket(response.data);});
   }, []);
+
+  console.log('ticket: ', ticket);
 
   if(!ticket.data) {
     ticketType = 'nao conectado ao banco';
@@ -84,10 +94,11 @@ export default function Payment() {
           
             <div className="valid-cvv">
               <input
-                type="text"
+                type="number"
                 className="valid"
                 placeholder="Valid Thru"
                 value={expiry}
+
                 onChange={
                   e => setExpiry(e.target.value)
                 }
@@ -102,13 +113,28 @@ export default function Payment() {
                 }
               />
             </div>
+            <p className={`ping ${hide}`} > para finalizar insira os dados corretamente</p>
           </div>
+          
         </div>
         
       </PaymentCardContainer>
+      <div onClick={sendPayment}>
+        <ConfirmPurchase>
+          <p>FINALIZAR PAGAMENTO</p>               
+        </ConfirmPurchase>
+      </div>
       
     </Container> 
   );
+
+  function sendPayment() {
+    if (cvv.length === 3 && name.length !== 0 && number.length === 16 && expiry.length === 6) {
+      console.log('ok');
+    } else {
+      setHide('');
+    }
+  }
 }
 
 const Container = styled.div`
@@ -226,4 +252,48 @@ flex-direction: column;
       }
     }
   }
+
+  .clear{
+    display: none;
+  }
+
+  .ping{
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 14px;
+
+    color: #FD0404;
+
+  }
+`;
+
+const ConfirmPurchase = styled.div`
+  width: 182px;
+  height: 37px;
+
+  margin-top: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  background: #E0E0E0;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;
+
+  color: #000000;
+
+  :hover {
+    cursor: pointer;
+  }
+
 `;
