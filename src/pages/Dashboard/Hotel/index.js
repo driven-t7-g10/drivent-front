@@ -13,8 +13,11 @@ export default function Hotel() {
       headers: {
         Authorization: 'Bearer ' + token,
       },
-    }).then((response) => { setHotelsList(response.data); });
+    }).then((response) => {
+      setHotelsList(response.data);
+    });
   }, []);
+  console.log(hotelsList);
 
   if (hotelsList.length === 0) {
     return (<Container>
@@ -32,15 +35,48 @@ export default function Hotel() {
       <div className="hotels_container">
         <h2 className='text_about_options'>Primeiro, escolha seu hotel</h2>
         <div className="hotels_options_container">
-          <Hotel_option>
-
-          </Hotel_option>
+          {hotelsList.map((hotel, index) => (
+            <Hotel_Options
+              key={index}
+              id={hotel.id}
+            />
+          ))}
         </div>
       </div>
-
     </Container>
   );
 };
+
+function Hotel_Options(id) {
+  const token = useToken();
+  const [hotel, setHotel] = useState({});
+  const [rooms, setRooms] = useState(true);
+
+  useEffect(() => {
+    axios.get(`http://localhost:4000/hotels/${id.id}`, {
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    }).then((response) => {
+      setHotel(response.data);
+    });
+  }, []);
+  console.log(hotel);
+
+  function showRooms(id) {
+    console.log(`cliquei no ${id.id}`);
+    // aqui pode ser feita a mudança de cor
+  }
+
+  return (
+    <>
+      <Hotel_option onClick={() => { showRooms(id); setRooms(false); }}>
+        oi
+      </Hotel_option>
+      {rooms ? '' : <>quartos</>}
+    </>
+  );
+}
 
 const Container = styled.div`
  display: flex;
@@ -95,7 +131,6 @@ display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
-background: ${props => props.collor};
  
 .price{
  font-family: 'Roboto';
