@@ -3,9 +3,12 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 import useToken from '../../../hooks/useToken';
+import Room_Options from './Room';
 
 export default function Hotel() {
   const [hotelsList, setHotelsList] = useState([]);
+  const [Showrooms, setShowRooms] = useState(true);
+  const [rooms, setRooms] = useState([]);
   const token = useToken();
 
   useEffect(() => {
@@ -13,7 +16,9 @@ export default function Hotel() {
       headers: {
         Authorization: 'Bearer ' + token,
       },
-    }).then((response) => { setHotelsList(response.data); });
+    }).then((response) => {
+      setHotelsList(response.data);
+    });
   }, []);
 
   if (hotelsList.length === 0) {
@@ -32,15 +37,50 @@ export default function Hotel() {
       <div className="hotels_container">
         <h2 className='text_about_options'>Primeiro, escolha seu hotel</h2>
         <div className="hotels_options_container">
-          <Hotel_option>
-
-          </Hotel_option>
+          {hotelsList.map((hotel, index) => (
+            <Hotel_Options
+              key={index}
+              name={hotel.name}
+              id={hotel.id}
+              setShowRooms={setShowRooms}
+              rooms={hotel.Rooms}
+              setRooms={setRooms}
+            />
+          ))}
         </div>
+        {Showrooms ? '' :
+          <>
+            <h2 className='text_about_options'>Ótima pedida! Agora escolha seu quarto:</h2>
+            <div className='room_container'>
+              {rooms.map((room, index) => (
+                <Room_Options
+                  key={index}
+                  id={room.id}
+                  name={room.name}
+                  capacity={room.capacity}
+                />
+              ))}</div>
+          </>
+        }
       </div>
-
     </Container>
   );
 };
+
+function Hotel_Options({ name, id, setShowRooms, rooms, setRooms }) {
+  function showRooms(id) {
+    console.log(`cliquei no ${id}`);
+    // aqui pode ser feita a mudança de cor
+  }
+
+  return (
+    <>
+      <Hotel_option onClick={() => { showRooms(id); setShowRooms(false); setRooms(rooms); }}>
+        {name}
+      </Hotel_option>
+    </>
+  );
+}
 
 const Container = styled.div`
  display: flex;
@@ -80,6 +120,10 @@ const Container = styled.div`
  .hotels_options_container{
    display: flex;
  }
+ .room_container{
+  border: 2px solid green;
+  display: flex;
+ }
  `;
 
 const Hotel_option = styled.div`
@@ -95,7 +139,6 @@ display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
-background: ${props => props.collor};
  
 .price{
  font-family: 'Roboto';
