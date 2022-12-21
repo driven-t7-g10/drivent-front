@@ -15,8 +15,6 @@ export default function Payment() {
 
   const token = useToken();
 
-  const server_url = process.env.REACT_APP_SERVER_URL;
-
   useEffect(() => {
     axios
       .get('http://localhost:4000/tickets/types', {
@@ -38,7 +36,7 @@ export default function Payment() {
   let onlineId;
   
   for (let i = 0; i < ticket.length; i++) {
-    if (ticket[i].name === 'online') {
+    if (ticket[i].name === 'Online') {
       online = ticket[i].name;
       onlinePrice = ticket[i].price / 100;
       onlineId = ticket[i].id;
