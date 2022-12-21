@@ -3,9 +3,12 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 import useToken from '../../../hooks/useToken';
+import Room_Options from './Room';
 
 export default function Hotel() {
   const [hotelsList, setHotelsList] = useState([]);
+  const [Showrooms, setShowRooms] = useState(true);
+  const [rooms, setRooms] = useState([]);
   const token = useToken();
 
   useEffect(() => {
@@ -17,7 +20,6 @@ export default function Hotel() {
       setHotelsList(response.data);
     });
   }, []);
-  console.log(hotelsList);
 
   if (hotelsList.length === 0) {
     return (<Container>
@@ -38,42 +40,44 @@ export default function Hotel() {
           {hotelsList.map((hotel, index) => (
             <Hotel_Options
               key={index}
+              name={hotel.name}
               id={hotel.id}
+              setShowRooms={setShowRooms}
+              rooms={hotel.Rooms}
+              setRooms={setRooms}
             />
           ))}
         </div>
+        {Showrooms ? '' :
+          <>
+            <h2 className='text_about_options'>Ótima pedida! Agora escolha seu quarto:</h2>
+            <div className='room_container'>
+              {rooms.map((room, index) => (
+                <Room_Options
+                  key={index}
+                  id={room.id}
+                  name={room.name}
+                  capacity={room.capacity}
+                />
+              ))}</div>
+          </>
+        }
       </div>
     </Container>
   );
 };
 
-function Hotel_Options(id) {
-  const token = useToken();
-  const [hotel, setHotel] = useState({});
-  const [rooms, setRooms] = useState(true);
-
-  useEffect(() => {
-    axios.get(`http://localhost:4000/hotels/${id.id}`, {
-      headers: {
-        Authorization: 'Bearer ' + token,
-      },
-    }).then((response) => {
-      setHotel(response.data);
-    });
-  }, []);
-  console.log(hotel);
-
+function Hotel_Options({ name, id, setShowRooms, rooms, setRooms }) {
   function showRooms(id) {
-    console.log(`cliquei no ${id.id}`);
+    console.log(`cliquei no ${id}`);
     // aqui pode ser feita a mudança de cor
   }
 
   return (
     <>
-      <Hotel_option onClick={() => { showRooms(id); setRooms(false); }}>
-        oi
+      <Hotel_option onClick={() => { showRooms(id); setShowRooms(false); setRooms(rooms); }}>
+        {name}
       </Hotel_option>
-      {rooms ? '' : <>quartos</>}
     </>
   );
 }
@@ -115,6 +119,10 @@ const Container = styled.div`
  }
  .hotels_options_container{
    display: flex;
+ }
+ .room_container{
+  border: 2px solid green;
+  display: flex;
  }
  `;
 
