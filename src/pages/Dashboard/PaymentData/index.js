@@ -16,7 +16,6 @@ export default function Payment() {
   const [hide, setHide] = useState('clear');
   const [issuer, setIssuer] = useState('');
   const [paymentRequest, setPaymentRequest] = useState(true);
-  console.log(paymentRequest);
 
   const token = useToken();
 

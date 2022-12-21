@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
@@ -17,7 +16,16 @@ export default function Hotel() {
     }).then((response) => { setHotelsList(response.data); });
   }, []);
 
-  console.log(hotelsList);
+  if (hotelsList.length === 0) {
+    return (<Container>
+      <h1>Escolha de hotel e quarto</h1>
+      <div className="no_hotels_container">
+        <h2 className='text_about_options'>Você precisa ter confirmado pagamento antes
+          de fazer a escolha de hospedagem</h2>
+      </div>
+    </Container>);
+  };
+
   return (
     <Container>
       <h1>Escolha de hotel e quarto</h1>
@@ -37,7 +45,8 @@ export default function Hotel() {
 const Container = styled.div`
  display: flex;
  flex-direction: column;
- 
+ height: 100%;
+
  h1{
    font-family: 'Roboto',sans-serif;
    font-style: normal;
@@ -58,6 +67,12 @@ const Container = styled.div`
   .hotels_container{
    display: flex;
    flex-direction: column;
+ }
+ .no_hotels_container{
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
  }
  .text_about_options{
      margin: 37px 0 17px 0;
