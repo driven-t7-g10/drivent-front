@@ -9,6 +9,7 @@ export default function Hotel() {
   const [hotelsList, setHotelsList] = useState([]);
   const [Showrooms, setShowRooms] = useState(true);
   const [rooms, setRooms] = useState([]);
+  const [ticket, setTicket] = useState([]);
   const token = useToken();
 
   useEffect(() => {
@@ -20,6 +21,28 @@ export default function Hotel() {
       setHotelsList(response.data);
     });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:4000/tickets', {
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+      })
+      .then((response) => { setTicket(response.data); });
+  }, []);
+
+  if (ticket.length === 0) return null;
+
+  if (ticket.TicketType.includesHotel === false) {
+    return (<Container>
+      <h1>Escolha de hotel e quarto</h1>
+      <div className="no_hotels_container">
+        <h2 className='text_about_options'>Sua modalidade de ingresso não inclui hospedagem
+Prossiga para a escolha de atividades</h2>
+      </div>
+    </Container>);
+  }
 
   if (hotelsList.length === 0) {
     return (<Container>
