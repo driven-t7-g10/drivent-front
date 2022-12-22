@@ -11,24 +11,35 @@ export default function Payment() {
   const [select, setSelect] = useState('');
   const [withHotel, setWithHotel] = useState(false);
   const [withoutHotel, setWithoutHotel] = useState(false);
+  const [ticketTypes, setTicketTypes] = useState([]);
 
   const navigate = useNavigate();
 
-  const [ticket, setTicket] = useState([]);
+  // const [ticket, setTicket] = useState({});
 
   const token = useToken();
 
+  const BASE_URL = 'http://localhost:4000';
+
   useEffect(() => {
     axios
-      .get('http://localhost:4000/tickets/types', {
+      .get(`${BASE_URL}/tickets/types`, {
         headers: {
           Authorization: 'Bearer ' + token,
         },
       })
-      .then((response) => { setTicket(response.data); });
-  }, []);
+      .then((response) => { setTicketTypes(response.data); });
 
-  if (ticket.length === 0) return null;
+    axios
+      .get(`${BASE_URL}/tickets`, {
+        headers: {
+          Authorization: 'Bearer ' + token,
+        }
+      })
+      .then((response) => navigate('/dashboard/payment/data'))
+      .catch();
+  }, []);
+  if (ticketTypes.length === 0) return null;
 
   let presential;
   let presentialPrice;
@@ -39,19 +50,19 @@ export default function Payment() {
   let withHotelPrice;
   let withHotelId;
 
-  for (let i = 0; i < ticket.length; i++) {
-    if (ticket[i].isRemote) {
+  for (let i = 0; i < ticketTypes.length; i++) {
+    if (ticketTypes[i].isRemote) {
       online = 'Online';
-      onlinePrice = ticket[i].price / 100;
-      onlineId = ticket[i].id;
-    } else if (!ticket[i].includesHotel) {
+      onlinePrice = ticketTypes[i].price / 100;
+      onlineId = ticketTypes[i].id;
+    } else if (!ticketTypes[i].includesHotel) {
       presential = 'Presencial';
-      presentialPrice = ticket[i].price / 100;
-      presentialId = ticket[i].id;
+      presentialPrice = ticketTypes[i].price / 100;
+      presentialId = ticketTypes[i].id;
     } else {
       presential = 'Presencial';
-      withHotelPrice = ticket[i].price / 100;
-      withHotelId = ticket[i].id;
+      withHotelPrice = ticketTypes[i].price / 100;
+      withHotelId = ticketTypes[i].id;
     }
   }
 
