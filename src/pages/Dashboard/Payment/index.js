@@ -353,4 +353,8 @@ font-weight: 400;
 font-size: 14px;
 line-height: 16px;
 text-align: center;
+
+:hover {
+    cursor: pointer;
+  }
 `;

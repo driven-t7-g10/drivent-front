@@ -14,7 +14,8 @@ export default function Payment() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [hide, setHide] = useState('clear');
-  const[issuer, setIssuer] = useState('');
+  const [issuer, setIssuer] = useState('');
+  const [paymentRequest, setPaymentRequest] = useState(true);
 
   const token = useToken();
 
@@ -25,11 +26,11 @@ export default function Payment() {
           Authorization: 'Bearer ' + token,
         },
       })
-      .then((response) => {setTicket(response.data);});
+      .then((response) => { setTicket(response.data); });
   }, []);
 
   if (ticket.length === 0) return null;
-  
+
   return (
     <Container>
       <h1>Ingresso e pagamento</h1>
@@ -45,7 +46,7 @@ export default function Payment() {
 
       <PaymentCardContainer>
         <h1>Pagamento</h1>
-        <div className='cardInf'>
+        {paymentRequest ? <><div className='cardInf'>
           <Cards
             style={{ width: '10px' }}
             cvc={cvv}
@@ -73,14 +74,13 @@ export default function Payment() {
                 e => setName(e.target.value)
               }
             />
-          
+
             <div className="valid-cvv">
               <input
                 type="number"
                 className="valid"
                 placeholder="Valid Thru"
                 value={expiry}
-
                 onChange={
                   e => setExpiry(e.target.value)
                 }
@@ -97,17 +97,15 @@ export default function Payment() {
             </div>
             <p className={`ping ${hide}`} > para finalizar insira os dados corretamente</p>
           </div>
-          
         </div>
-        
+        <div onClick={() => sendPayment()}>
+          <ConfirmPurchase>
+            <p>FINALIZAR PAGAMENTO</p>
+          </ConfirmPurchase>
+        </div>
+        </> : <div className='confirmPayment'><ion-icon name="checkmark-circle-outline"></ion-icon><div className='confirm'><h1>Pagamento confirmado!</h1><h2>Prossiga para escolha de hospedagem e atividades</h2></div></div>}
       </PaymentCardContainer>
-      <div onClick={sendPayment}>
-        <ConfirmPurchase>
-          <p>FINALIZAR PAGAMENTO</p>               
-        </ConfirmPurchase>
-      </div>
-      
-    </Container> 
+    </Container>
   );
 
   function sendPayment() {
@@ -120,8 +118,6 @@ export default function Payment() {
         expirationDate: `${expiry[0]}${expiry[1]}/${expiry[2]}${expiry[3]}${expiry[4]}${expiry[5]}`,
         cvv: cvv,
       };
-      console.log(body);
-
       axios
         .post('http://localhost:4000/payments/process', {
           ticketId: ticket.id,
@@ -132,6 +128,7 @@ export default function Payment() {
           },
         }).then((response) => {
           console.log('foi');
+          setPaymentRequest(false);
         });
     } else {
       setHide('');
@@ -147,7 +144,6 @@ export default function Payment() {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-
   h1{
     font-family: 'Roboto',sans-serif;
     font-style: normal;
@@ -156,35 +152,27 @@ const Container = styled.div`
     line-height: 40px;
     color: #000000;
   }
-
   .text_about_options{
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
-
     color: #454545;
-
     margin-top: 37px;
-
   }
-
   .ticket{
     margin: 17px 0 30px 0;
     width: 290px;
     height: 108px;
     left: 330px;
     top: 292px;
-
     background: #FFEED2;
     border-radius: 20px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     h1{
       font-family: 'Roboto';
       font-style: normal;
@@ -192,12 +180,9 @@ const Container = styled.div`
       font-size: 16px;
       line-height: 19px;
       /* identical to box height */
-
       text-align: center;
-
       color: #454545;
     }
-
     p{
       font-family: 'Roboto';
       font-style: normal;
@@ -205,27 +190,21 @@ const Container = styled.div`
       font-size: 14px;
       line-height: 16px;
       text-align: center;
-
       color: #898989;
-
     }
   }
-
 `;
 
 const PaymentCardContainer = styled.div`
 display: flex;
 flex-direction: column;
-
   h1{
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
     font-size: 20px;
     line-height: 23px;
-
     color: #8E8E8E;
-
     margin-bottom: 20px;
   }
   .rccs{
@@ -240,11 +219,9 @@ flex-direction: column;
     flex-direction: column;
     height: 182px;
     justify-content: space-between;
-
     input{
       width: 350px;
       height: 46px;
-
       border: 1.5px solid #8E8E8E;
       border-radius: 5px;
     }
@@ -259,29 +236,44 @@ flex-direction: column;
       }
     }
   }
-
   .clear{
     display: none;
   }
-
   .ping{
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
     font-size: 17px;
     line-height: 14px;
-
     color: #FD0404;
-
   }
+  .confirmPayment{
+    display: flex;
+    align-items: center;
+    ion-icon{
+      font-size: 36px;
+      background-color: green;
+      border-radius: 50%;
+    }
+  }
+  .confirm{
+    margin-left: 10px;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 19px;
+    color: #454545;
+    h1{
+      margin-bottom: 2px;
+      font-size: 16px;
+    }
+  }
+
 `;
 
 const ConfirmPurchase = styled.div`
   width: 182px;
   height: 37px;
-
   margin-top: 45px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -289,18 +281,14 @@ const ConfirmPurchase = styled.div`
   background: #E0E0E0;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
   border-radius: 4px;
-
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
   font-size: 14px;
   line-height: 16px;
   text-align: center;
-
   color: #000000;
-
   :hover {
     cursor: pointer;
   }
-
 `;
