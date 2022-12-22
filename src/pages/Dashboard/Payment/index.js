@@ -25,8 +25,6 @@ export default function Payment() {
       .then((response) => {setTicket(response.data);});
   }, []);
 
-  console.log(ticket);
-
   if (ticket.length === 0) return null;
 
   let presential;
@@ -263,4 +261,8 @@ font-weight: 400;
 font-size: 14px;
 line-height: 16px;
 text-align: center;
+
+:hover {
+    cursor: pointer;
+  }
 `;
