@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 import useToken from '../../../hooks/useToken';
+import Hotel_Options from './Hotel_Options';
 import Room_Options from './Room';
+
+let booking=[];
 
 export default function Hotel() {
   const [hotelsList, setHotelsList] = useState([]);
@@ -68,6 +71,7 @@ Prossiga para a escolha de atividades</h2>
               setShowRooms={setShowRooms}
               rooms={hotel.Rooms}
               setRooms={setRooms}
+              booking={booking}
             />
           ))}
         </div>
@@ -81,6 +85,7 @@ Prossiga para a escolha de atividades</h2>
                   id={room.id}
                   name={room.name}
                   capacity={room.capacity}
+                  booking={booking}
                 />
               ))}</div>
           </>
@@ -89,21 +94,6 @@ Prossiga para a escolha de atividades</h2>
     </Container>
   );
 };
-
-function Hotel_Options({ name, id, setShowRooms, rooms, setRooms }) {
-  function showRooms(id) {
-    console.log(`cliquei no ${id}`);
-    // aqui pode ser feita a mudança de cor
-  }
-
-  return (
-    <>
-      <Hotel_option onClick={() => { showRooms(id); setShowRooms(false); setRooms(rooms); }}>
-        {name}
-      </Hotel_option>
-    </>
-  );
-}
 
 const Container = styled.div`
  display: flex;
@@ -146,6 +136,8 @@ const Container = styled.div`
  .room_container{
   border: 2px solid green;
   display: flex;
+  flex-wrap: wrap;
+  width: 850px;
  }
  `;
 
