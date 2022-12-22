@@ -3,11 +3,14 @@ import { useState, useEffect } from 'react';
 import useToken from '../../../hooks/useToken';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { TicketButton } from '../../../components/Payment/TicketButton';
 
 export default function Payment() {
   const [presentialCollor, setPresentialCollor] = useState('white');
   const [onlineCollor, setOnlineCollor] = useState('white');
   const [select, setSelect] = useState('');
+  const [withHotel, setWithHotel] = useState(false);
+  const [withoutHotel, setWithoutHotel] = useState(false);
 
   const navigate = useNavigate();
 
@@ -22,27 +25,33 @@ export default function Payment() {
           Authorization: 'Bearer ' + token,
         },
       })
-      .then((response) => {setTicket(response.data);});
+      .then((response) => { setTicket(response.data); });
   }, []);
-
-  console.log(ticket);
 
   if (ticket.length === 0) return null;
 
   let presential;
   let presentialPrice;
+  let presentialId;
   let online;
   let onlinePrice;
   let onlineId;
-  
+  let withHotelPrice;
+  let withHotelId;
+
   for (let i = 0; i < ticket.length; i++) {
-    if (ticket[i].name === 'Online') {
-      online = ticket[i].name;
+    if (ticket[i].isRemote) {
+      online = 'Online';
       onlinePrice = ticket[i].price / 100;
       onlineId = ticket[i].id;
+    } else if (!ticket[i].includesHotel) {
+      presential = 'Presencial';
+      presentialPrice = ticket[i].price / 100;
+      presentialId = ticket[i].id;
     } else {
-      presential = ticket[i].name;
-      presentialPrice = ticket[i].price/100;
+      presential = 'Presencial';
+      withHotelPrice = ticket[i].price / 100;
+      withHotelId = ticket[i].id;
     }
   }
 
@@ -57,7 +66,7 @@ export default function Payment() {
             onClick={() => { clickInPresential(); }}
           >
             <p>{presential}</p>
-            <p className='price'>R$ R$ {' ' + presentialPrice}</p>
+            <p className='price'>R$ {' ' + presentialPrice}</p>
           </Ticket_modality_presential>
 
           <Ticket_modality_online
@@ -65,13 +74,13 @@ export default function Payment() {
             onClick={() => { clickInOnline(); }}
           >
             <p>{online}</p>
-            <p className='price'>R$ R$ {' ' + onlinePrice}</p>
+            <p className='price'>R$ {' ' + onlinePrice}</p>
           </Ticket_modality_online>
         </div>
       </div>
       {select === 'online' ?
         <TicketModality>
-          <div>Fechado! O total ficou em <strong className='confirmationButton'>{onlinePrice}</strong>. Agora é só confirmar:</div>
+          <div>Fechado! O total ficou em R$<strong className='confirmationButton'>{onlinePrice}</strong>. Agora é só confirmar:</div>
           <Button onClick={() => {
             axios
               .post('http://localhost:4000/tickets', {
@@ -84,7 +93,68 @@ export default function Payment() {
                 navigate('/dashboard/payment/data');
               });
           }}>RESERVAR INGRESSO</Button>
-        </TicketModality> : <TicketModality>presencial</TicketModality>}
+        </TicketModality>
+        :
+        select === 'presential' ?
+          <div className="ticket_container">
+            <h2 className='text_about_options'>Ótimo! Agora escolha sua modalidade de hospedagem</h2>
+            <div className="modality_container">
+              <TicketButton
+                onClick={selectTicketWithoutHotel}
+                selected={withoutHotel}
+              >
+                <p>Sem Hotel</p>
+                <span>+ R$0</span>
+              </TicketButton>
+              <TicketButton
+                onClick={selectTicketWithHotel}
+                selected={withHotel}
+              >
+                <p>Com Hotel</p>
+                <span>+ R$350</span>
+              </TicketButton>
+            </div>
+          </div>
+          :
+          <></>
+      }
+      {
+        withHotel ?
+          <TicketModality>
+            <div>Fechado! O total ficou em R$<strong className='confirmationButton'>{withHotelPrice}</strong>. Agora é só confirmar:</div>
+            <Button onClick={() => {
+              axios
+                .post('http://localhost:4000/tickets', {
+                  ticketTypeId: withHotelId
+                }, {
+                  headers: {
+                    Authorization: 'Bearer ' + token,
+                  },
+                }).then((response) => {
+                  navigate('/dashboard/payment/data');
+                });
+            }}>RESERVAR INGRESSO</Button>
+          </TicketModality>
+          :
+          withoutHotel ?
+            <TicketModality>
+              <div>Fechado! O total ficou em R$<strong className='confirmationButton'>{presentialPrice}</strong>. Agora é só confirmar:</div>
+              <Button onClick={() => {
+                axios
+                  .post('http://localhost:4000/tickets', {
+                    ticketTypeId: presentialId
+                  }, {
+                    headers: {
+                      Authorization: 'Bearer ' + token,
+                    },
+                  }).then((response) => {
+                    navigate('/dashboard/payment/data');
+                  });
+              }}>RESERVAR INGRESSO</Button>
+            </TicketModality>
+            :
+            <></>
+      }
     </Container>
   );
 
@@ -93,6 +163,8 @@ export default function Payment() {
       setOnlineCollor('#FFEED2');
       setSelect('online');
     } else if (onlineCollor === 'white' && presentialCollor !== 'white') {
+      setWithHotel(false);
+      setWithoutHotel(false);
       setOnlineCollor('#FFEED2');
       setPresentialCollor('white');
       setSelect('online');
@@ -113,6 +185,24 @@ export default function Payment() {
     } else if (onlineCollor === 'white' && presentialCollor !== 'white') {
       setPresentialCollor('white');
       setSelect('');
+    }
+  }
+
+  function selectTicketWithHotel() {
+    if(withoutHotel) {
+      setWithoutHotel(false);
+      setWithHotel(true);
+    } else {
+      setWithHotel(!withHotel);
+    }
+  }
+
+  function selectTicketWithoutHotel() {
+    if(withHotel) {
+      setWithoutHotel(true);
+      setWithHotel(false);
+    } else {
+      setWithoutHotel(!withoutHotel);
     }
   }
 }
@@ -178,10 +268,6 @@ const Ticket_modality_presential = styled.div`
     text-align: center;
 
     color: #454545;
-
-    :hover {
-      cursor: pointer;
-    }
   }
 
   .price{
@@ -194,6 +280,10 @@ const Ticket_modality_presential = styled.div`
 
     color: #898989;
     margin-top: 3px;
+  }
+
+  :hover {
+    cursor: pointer;
   }
 `;
 
