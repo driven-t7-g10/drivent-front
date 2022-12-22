@@ -36,8 +36,7 @@ export default function Payment() {
           Authorization: 'Bearer ' + token,
         }
       })
-      .then((response) => navigate('/dashboard/payment/data'))
-      .catch();
+      .then((response) => navigate('/dashboard/payment/data'));
   }, []);
   if (ticketTypes.length === 0) return null;
 
