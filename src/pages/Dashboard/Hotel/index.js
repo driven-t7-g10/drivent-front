@@ -1,19 +1,23 @@
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
+import RoomContext from '../../../contexts/RoomsContext';
 import useToken from '../../../hooks/useToken';
 import Hotel_Options from './Hotel_Options';
 import Room_Options from './Room';
 
 let booking=[];
-
 export default function Hotel() {
   const [hotelsList, setHotelsList] = useState([]);
   const [Showrooms, setShowRooms] = useState(true);
-  const [rooms, setRooms] = useState([]);
   const [ticket, setTicket] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState([]);
   const token = useToken();
+  const { setRooms, rooms } = useContext(RoomContext);
+
+  console.log(rooms);
+  console.log(selectedRoom);
 
   useEffect(() => {
     axios.get('http://localhost:4000/hotels', {
@@ -86,6 +90,9 @@ Prossiga para a escolha de atividades</h2>
                   name={room.name}
                   capacity={room.capacity}
                   booking={booking}
+                  isSelected={room.isSelected}
+                  selectedRoom={selectedRoom} 
+                  setSelectedRoom={setSelectedRoom}
                 />
               ))}</div>
           </>
