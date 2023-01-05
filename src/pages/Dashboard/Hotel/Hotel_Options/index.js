@@ -1,13 +1,10 @@
 import axios from 'axios';
-import { useContext, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import RoomContext from '../../../../contexts/RoomsContext';
 import useToken from '../../../../hooks/useToken';
 
-let roomIncludingSelectedKey=[];
-export default function Hotel_Options({ name, id, setShowRooms, rooms, booking }) {
+export default function Hotel_Options({ name, id, setShowRooms, rooms, setRooms, booking }) {
   const token = useToken();
-  const { setRooms } = useContext(RoomContext);
   rooms.map(value => {
     useEffect(() => {
       axios.get(`http://localhost:4000/booking/${value.id}`, {
@@ -21,17 +18,12 @@ export default function Hotel_Options({ name, id, setShowRooms, rooms, booking }
   });
   function showRooms(id) {
     console.log(`cliquei no ${id}`);
-    for(let i=0; i < rooms.length; i++) {
-      const newObject = Object.assign(rooms[i], { isSelected: false });
-      roomIncludingSelectedKey.push(newObject);
-      setRooms(roomIncludingSelectedKey);
-    } 
     // aqui pode ser feita a mudança de cor
   }
   
   return (
     <>
-      <Hotel_option onClick={() => { showRooms(id); setShowRooms(false); }}>
+      <Hotel_option onClick={() => { showRooms(id); setShowRooms(false); setRooms(rooms); }}>
         {name}
       </Hotel_option>
     </>
