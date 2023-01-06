@@ -13,6 +13,7 @@ export default function Hotel() {
   const [Showrooms, setShowRooms] = useState(true);
   const [rooms, setRooms] = useState([]);
   const [ticket, setTicket] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(0);
   const token = useToken();
 
   useEffect(() => {
@@ -57,6 +58,20 @@ Prossiga para a escolha de atividades</h2>
     </Container>);
   };
 
+  async function postBooking(selectedRoom) {
+    console.log('clicou', selectedRoom);
+    await axios.post('http://localhost:4000/booking', { roomId: selectedRoom }, {
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    }).then((response) => {
+      console.log('ihu');
+      console.log(response.data);
+    }).catch((error) => {
+      console.error(error);
+    }); 
+  };
+
   return (
     <Container>
       <h1>Escolha de hotel e quarto</h1>
@@ -86,8 +101,11 @@ Prossiga para a escolha de atividades</h2>
                   name={room.name}
                   capacity={room.capacity}
                   booking={booking}
+                  selectedRoom={selectedRoom} 
+                  setSelectedRoom={setSelectedRoom}
                 />
               ))}</div>
+            <Reservation onClick={() => {postBooking(selectedRoom); }}>RESERVAR QUARTO</Reservation>
           </>
         }
       </div>
@@ -134,13 +152,32 @@ const Container = styled.div`
    display: flex;
  }
  .room_container{
-  border: 2px solid green;
   display: flex;
   flex-wrap: wrap;
   width: 850px;
  }
  `;
+const Reservation = styled.button`
+width: 182px;
+height: 37px;
+background: #E0E0E0;
+box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+border-radius: 4px;
+margin-top: 20px;
+border: none;
 
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 16px;
+text-align: center;
+color: #000000;
+
+:hover {
+ cursor: pointer;
+} 
+`;
 const Hotel_option = styled.div`
 box-sizing: border-box;
  
