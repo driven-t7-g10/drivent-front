@@ -16,8 +16,6 @@ export default function Hotel() {
   const [selectedRoom, setSelectedRoom] = useState(0);
   const token = useToken();
 
-  console.log(selectedRoom);
-
   useEffect(() => {
     axios.get('http://localhost:4000/hotels', {
       headers: {
@@ -60,6 +58,20 @@ Prossiga para a escolha de atividades</h2>
     </Container>);
   };
 
+  async function postBooking(selectedRoom) {
+    console.log('clicou', selectedRoom);
+    await axios.post('http://localhost:4000/booking', { roomId: selectedRoom }, {
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    }).then((response) => {
+      console.log('ihu');
+      console.log(response.data);
+    }).catch((error) => {
+      console.error(error);
+    }); 
+  };
+
   return (
     <Container>
       <h1>Escolha de hotel e quarto</h1>
@@ -93,7 +105,7 @@ Prossiga para a escolha de atividades</h2>
                   setSelectedRoom={setSelectedRoom}
                 />
               ))}</div>
-            <Reservation>RESERVAR QUARTO</Reservation>
+            <Reservation onClick={() => {postBooking(selectedRoom); }}>RESERVAR QUARTO</Reservation>
           </>
         }
       </div>
@@ -161,6 +173,10 @@ font-size: 14px;
 line-height: 16px;
 text-align: center;
 color: #000000;
+
+:hover {
+ cursor: pointer;
+} 
 `;
 const Hotel_option = styled.div`
 box-sizing: border-box;
