@@ -10,7 +10,7 @@ let booking=[];
 
 export default function Hotel() {
   const [hotelsList, setHotelsList] = useState([]);
-  const [Showrooms, setShowRooms] = useState(true);
+  const [Showrooms, setShowRooms] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [ticket, setTicket] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(0);
@@ -22,6 +22,7 @@ export default function Hotel() {
         Authorization: 'Bearer ' + token,
       },
     }).then((response) => {
+      console.log(response.data);
       setHotelsList(response.data);
     });
   }, []);
@@ -87,10 +88,11 @@ Prossiga para a escolha de atividades</h2>
               rooms={hotel.Rooms}
               setRooms={setRooms}
               booking={booking}
+              image={hotel.image}
             />
           ))}
         </div>
-        {Showrooms ? '' :
+        {!Showrooms ? '' :
           <>
             <h2 className='text_about_options'>Ótima pedida! Agora escolha seu quarto:</h2>
             <div className='room_container'>
