@@ -1,10 +1,13 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import useToken from '../../../../hooks/useToken';
+import useToken from '../../../hooks/useToken';
 
-export default function Hotel_Options({ name, id, setShowRooms, rooms, setRooms, booking, image }) {
+export default function Hotel({ name, rooms, setRooms, image }) {
   const token = useToken();
+  
+  let vacancies = 0;
+  rooms.map(room => vacancies += room.capacity - room.Booking.length);
 
   function getAccomodationTypes() {
     let accomodationTypes = [];
@@ -28,7 +31,7 @@ export default function Hotel_Options({ name, id, setShowRooms, rooms, setRooms,
 
   return (
     <>
-      <Hotel_option onClick={() => { setShowRooms(true); setRooms(rooms); }}>
+      <Container onClick={() => setRooms(rooms)}>
         <img src={image} alt='' />
         <h3>{name}</h3>
         <div>
@@ -37,19 +40,18 @@ export default function Hotel_Options({ name, id, setShowRooms, rooms, setRooms,
         </div>
         <div>
           <p>Vagas Disponíveis:</p>
-          <span>2</span>
+          <span>{vacancies}</span>
         </div>
-      </Hotel_option>
+      </Container>
     </>
   );
 }
-const Hotel_option = styled.div`
+const Container = styled.div`
 box-sizing: border-box;
  
 width: 196px;
 height: 264px;
- 
-border: 1px solid #CECECE;
+background-color: rgba(235, 235, 235, 1);
 border-radius: 20px;
 margin-right: 24px;
 display: flex;
@@ -60,14 +62,14 @@ padding: 15.5px 0;
  
 p, h3, span {
  font-family: 'Roboto';
- line-height: 19px;
  width: 168px;
  text-align: left;
  color: #454545;
 }
 
 p {
-  font-size: 16px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 h3 {

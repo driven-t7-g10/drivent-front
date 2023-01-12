@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import useToken from '../../../hooks/useToken';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { TicketButton } from '../../../components/Payment/TicketButton';
+import { TicketButton } from '../../../components/Dashboard/Payment/TicketButton';
 
 export default function Payment() {
   const [presentialCollor, setPresentialCollor] = useState('white');
