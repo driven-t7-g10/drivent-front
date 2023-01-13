@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import Hotel from './Hotel';
 
-export default function Hotels({ hotels, setRooms, setShowRooms }) {
+export default function Hotels({ hotels, setRooms, setShowRooms, setChoosenHotelId }) {
   return (
     <Container>
       {hotels.map((hotel, index) => (
@@ -13,6 +13,7 @@ export default function Hotels({ hotels, setRooms, setShowRooms }) {
           setRooms={setRooms}
           image={hotel.image}
           setShowRooms={setShowRooms}
+          setChoosenHotelId={setChoosenHotelId}
         />
       ))}
     </Container>
