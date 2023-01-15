@@ -24,7 +24,7 @@ export default function Room({ name, capacity, id, bookings, selectedRoom, setSe
         </div>
       </Container>
       :
-      <Container selected={selectedRoom === id} onClick={() => setSelectedRoom(id)}>
+      <Container selected={selectedRoom === id} onClick={() => setSelectedRoom(id) }>
         <span>{name}</span>
         <div>
           {spots.map((spot, index) => {

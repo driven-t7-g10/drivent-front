@@ -20,7 +20,9 @@ export default function Hotel() {
   const [choosenHotelId, setChoosenHotelId] = useState(0);
   const [choosenHotel, setChoosenHotel] = useState([]);
   const [choosenRoom, setChoosenRoom] = useState([]);
-  const [showReservation, setShowReervation] = useState(true);
+  const [showReservation, setShowRervation] = useState(true);
+  const [booking, setBooking] = useState([]);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     axios.get('http://localhost:4000/hotels', {
@@ -66,22 +68,52 @@ export default function Hotel() {
     );
   };
 
-  async function postBooking(selectedRoom) {
-    await axios.post('http://localhost:4000/booking', { roomId: selectedRoom }, {
+  console.log(selectedRoom);
+  console.log('count', count);
+
+  async function postBooking(selectedRoom, booking) {
+    if(count === 0 ) {
+      console.log(count, 'inu no post');
+      await axios.post('http://localhost:4000/booking', { roomId: selectedRoom }, {
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+      }).then((response) => {
+        setBooking(response.data);
+        const hotel = hotels.filter(value => value.id === choosenHotelId);
+        const rooms = hotel.map(value => value.Rooms);
+        const room = rooms[0].filter(value => value.id === selectedRoom);
+        setChoosenRoom(room);
+        setChoosenHotel(hotel);
+        setShowRervation(false);
+        setCount(1);
+      }).catch((error) => {
+        console.error(error);
+      });
+    } else {
+      console.log('booking', booking);
+      updateBooking(selectedRoom, booking);
+    }
+  };
+
+  async function updateBooking(selectedRoom, booking) {
+    console.log('put');
+    await axios.put(`http://localhost:4000/booking/${booking.bookingId}`, { roomId: selectedRoom }, {
       headers: {
         Authorization: 'Bearer ' + token,
       },
     }).then((response) => {
+      console.log(response.data);
       const hotel = hotels.filter(value => value.id === choosenHotelId);
       const rooms = hotel.map(value => value.Rooms);
       const room = rooms[0].filter(value => value.id === selectedRoom);
       setChoosenRoom(room);
       setChoosenHotel(hotel);
-      setShowReervation(false);
+      setShowRervation(false);
     }).catch((error) => {
       console.error(error);
     });
-  };
+  }
 
   return (
     <Container available>
@@ -101,8 +133,9 @@ export default function Hotel() {
                 rooms={rooms}
                 selectedRoom={selectedRoom}
                 setSelectedRoom={setSelectedRoom}
+                setCount={setCount}
               />
-              <ReservationButton onClick={() => postBooking(selectedRoom)}>RESERVAR QUARTO</ReservationButton>
+              <ReservationButton onClick={() => postBooking(selectedRoom, booking)}>RESERVAR QUARTO</ReservationButton>
             </>
           }     
         </>
@@ -117,7 +150,7 @@ export default function Hotel() {
               choosenRoom={choosenRoom}
             />
           ))}
-          <UpdateReservationButton>TROCAR DE QUARTO</UpdateReservationButton>
+          <UpdateReservationButton onClick={() => { setShowRervation(true); }}>TROCAR DE QUARTO</UpdateReservationButton>
         </>}
     </Container>
   );
