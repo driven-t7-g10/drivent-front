@@ -3,98 +3,155 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 import useToken from '../../../hooks/useToken';
-import Hotel_Options from './Hotel_Options';
-import Room_Options from './Room';
-
-let booking=[];
+import Hotels from '../../../components/Dashboard/Hotel/Hotels';
+import Rooms from '../../../components/Dashboard/Hotel/Rooms';
+import { useNavigate } from 'react-router-dom';
+import { ReservatedRoom } from './ReservatedRoom';
 
 export default function Hotel() {
-  const [hotelsList, setHotelsList] = useState([]);
-  const [Showrooms, setShowRooms] = useState(true);
-  const [rooms, setRooms] = useState([]);
-  const [ticket, setTicket] = useState([]);
   const token = useToken();
+  const navigate = useNavigate();
+
+  const [hotels, setHotels] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(0);
+  const [isPaidTicket, setIsPaidTicket] = useState(true);
+  const [isRightTicket, setIsRightTicket] = useState(true);
+  const [choosenHotelId, setChoosenHotelId] = useState(0);
+  const [choosenHotel, setChoosenHotel] = useState([]);
+  const [choosenRoom, setChoosenRoom] = useState([]);
+  const [showReservation, setShowRervation] = useState(true);
+  const [booking, setBooking] = useState([]);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     axios.get('http://localhost:4000/hotels', {
       headers: {
         Authorization: 'Bearer ' + token,
       },
-    }).then((response) => {
-      setHotelsList(response.data);
-    });
+    })
+      .then((response) => {
+        console.log(response.data);
+        setHotels(response.data);
+      })
+      .catch((error) => {
+        if (error.response.status === 404) {
+          navigate('/dashboard/subscription');
+        } else if (error.response.status === 402) {
+          setIsPaidTicket(false);
+        } else if (error.response.status === 403) {
+          setIsRightTicket(false);
+        }
+      });
   }, []);
 
-  if (hotelsList.length === 0) return null;
+  if (hotels.length === 0) {
+    return (
+      isPaidTicket && isRightTicket ?
+        <Container>
+          <h1>Escolha de hotel e quarto</h1>
+          <NoHotels>Neste momento, não há hoteis</NoHotels>
+        </Container>
+        :
+        isRightTicket ?
+          <Container>
+            <h1>Escolha de hotel e quarto</h1>
+            <NoHotels>Você precisa ter confirmado pagamento antes<br />
+              de fazer a escolha de hospedagem</NoHotels>
+          </Container>
+          :
+          <Container>
+            <h1>Escolha de hotel e quarto</h1>
+            <NoHotels>Sua modalidade de ingresso não inclui hospedagem<br />
+            Prossiga para a escolha de atividades</NoHotels>
+          </Container>
+    );
+  };
 
-  console.log('hotel: ', hotelsList);
+  console.log(selectedRoom);
+  console.log('count', count);
 
-  useEffect(() => {
-    axios
-      .get('http://localhost:4000/tickets', {
+  async function postBooking(selectedRoom, booking) {
+    if(count === 0 ) {
+      console.log(count, 'inu no post');
+      await axios.post('http://localhost:4000/booking', { roomId: selectedRoom }, {
         headers: {
           Authorization: 'Bearer ' + token,
         },
-      })
-      .then((response) => { setTicket(response.data); });
-  }, []);
-
-  if (ticket.length === 0) return null;
-
-  if (ticket.TicketType.includesHotel === false) {
-    return (<Container>
-      <h1>Escolha de hotel e quarto</h1>
-      <div className="no_hotels_container">
-        <h2 className='text_about_options'>Sua modalidade de ingresso não inclui hospedagem
-Prossiga para a escolha de atividades</h2>
-      </div>
-    </Container>);
-  }
-
-  if (hotelsList.length === 0) {
-    return (<Container>
-      <h1>Escolha de hotel e quarto</h1>
-      <div className="no_hotels_container">
-        <h2 className='text_about_options'>Você precisa ter confirmado pagamento antes
-          de fazer a escolha de hospedagem</h2>
-      </div>
-    </Container>);
+      }).then((response) => {
+        setBooking(response.data);
+        const hotel = hotels.filter(value => value.id === choosenHotelId);
+        const rooms = hotel.map(value => value.Rooms);
+        const room = rooms[0].filter(value => value.id === selectedRoom);
+        setChoosenRoom(room);
+        setChoosenHotel(hotel);
+        setShowRervation(false);
+        setCount(1);
+      }).catch((error) => {
+        console.error(error);
+      });
+    } else {
+      console.log('booking', booking);
+      updateBooking(selectedRoom, booking);
+    }
   };
 
+  async function updateBooking(selectedRoom, booking) {
+    console.log('put');
+    await axios.put(`http://localhost:4000/booking/${booking.bookingId}`, { roomId: selectedRoom }, {
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    }).then((response) => {
+      console.log(response.data);
+      const hotel = hotels.filter(value => value.id === choosenHotelId);
+      const rooms = hotel.map(value => value.Rooms);
+      const room = rooms[0].filter(value => value.id === selectedRoom);
+      setChoosenRoom(room);
+      setChoosenHotel(hotel);
+      setShowRervation(false);
+    }).catch((error) => {
+      console.error(error);
+    });
+  }
+
   return (
-    <Container>
+    <Container available>
       <h1>Escolha de hotel e quarto</h1>
-      <div className="hotels_container">
-        <h2 className='text_about_options'>Primeiro, escolha seu hotel</h2>
-        <div className="hotels_options_container">
-          {hotelsList.map((hotel, index) => (
-            <Hotel_Options
+      {showReservation ? 
+        <>
+          <ChooseText>Primeiro, escolha seu hotel</ChooseText>
+          <Hotels
+            hotels={hotels}
+            setRooms={setRooms}
+            setChoosenHotelId={setChoosenHotelId}
+          />
+          {rooms.length === 0 ? '' :
+            <>
+              <ChooseText>Ótima pedida! Agora escolha seu quarto:</ChooseText>
+              <Rooms
+                rooms={rooms}
+                selectedRoom={selectedRoom}
+                setSelectedRoom={setSelectedRoom}
+                setCount={setCount}
+              />
+              <ReservationButton onClick={() => postBooking(selectedRoom, booking)}>RESERVAR QUARTO</ReservationButton>
+            </>
+          }     
+        </>
+        :
+        <>
+          <ChooseText>Você já escolheu seu quarto:</ChooseText>
+          {choosenHotel.map((hotel, index) => (
+            <ReservatedRoom
               key={index}
               name={hotel.name}
-              id={hotel.id}
-              setShowRooms={setShowRooms}
-              rooms={hotel.Rooms}
-              setRooms={setRooms}
-              booking={booking}
+              image={hotel.image}
+              choosenRoom={choosenRoom}
             />
           ))}
-        </div>
-        {Showrooms ? '' :
-          <>
-            <h2 className='text_about_options'>Ótima pedida! Agora escolha seu quarto:</h2>
-            <div className='room_container'>
-              {rooms.map((room, index) => (
-                <Room_Options
-                  key={index}
-                  id={room.id}
-                  name={room.name}
-                  capacity={room.capacity}
-                  booking={booking}
-                />
-              ))}</div>
-          </>
-        }
-      </div>
+          <UpdateReservationButton onClick={() => { setShowRervation(true); }}>TROCAR DE QUARTO</UpdateReservationButton>
+        </>}
     </Container>
   );
 };
@@ -104,87 +161,70 @@ const Container = styled.div`
  flex-direction: column;
  height: 100%;
 
- h1{
-   font-family: 'Roboto',sans-serif;
-   font-style: normal;
-   font-weight: 400;
-   font-size: 34px;
-   line-height: 40px;
-   color: #000000;
- }
- 
- h2{
-   font-family: 'Roboto';
-   font-style: normal;
-   font-weight: 400;
-   font-size: 20px;
-   line-height: 23px;
-   color: #8E8E8E;
- }
-  .hotels_container{
-   display: flex;
-   flex-direction: column;
- }
- .no_hotels_container{
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
- }
- .text_about_options{
-     margin: 37px 0 17px 0;
- }
- .hotels_options_container{
-   display: flex;
- }
- .room_container{
-  border: 2px solid green;
-  display: flex;
-  flex-wrap: wrap;
-  width: 850px;
+ h1 {
+    font-family: 'Roboto',sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 40px;
+    color: #000000;
  }
  `;
+const UpdateReservationButton = styled.button`
+width: 182px;
+height: 37px;
+background: #E0E0E0;
+box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+border-radius: 4px;
+margin-top: 20px;
+border: none;
+font-family: 'Roboto';
+font-size: 14px;
+text-align: center;
+color: #000000;
 
-const Hotel_option = styled.div`
-box-sizing: border-box;
- 
-width: 145px;
-height: 145px;
- 
-border: 1px solid #CECECE;
-border-radius: 20px;
-margin-right: 24px;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
- 
-.price{
- font-family: 'Roboto';
- font-style: normal;
- font-weight: 400;
- font-size: 14px;
- line-height: 16px;
- text-align: center;
- 
- color: #898989;
- margin-top: 3px;
-}
- 
-p{
- font-family: 'Roboto';
- font-style: normal;
- font-weight: 400;
- font-size: 16px;
- line-height: 19px;
- /* identical to box height */
- 
- text-align: center;
- 
- color: #454545;
-}
- 
 :hover {
  cursor: pointer;
 } 
+`;
+
+const ReservationButton = styled.button`
+width: 182px;
+height: 37px;
+background: #E0E0E0;
+box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+border-radius: 4px;
+margin-top: 20px;
+border: none;
+font-family: 'Roboto';
+font-size: 14px;
+text-align: center;
+color: #000000;
+
+:hover {
+ cursor: pointer;
+} 
+`;
+
+const NoHotels = styled.p`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Roboto';
+  font-size: 20px;
+  line-height: 23px;
+  color: #8E8E8E;
+  text-align: center;
+`;
+
+const ChooseText = styled.p`
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 23px;
+  color: #8E8E8E;
+  margin: 37px 0 17px;
 `;

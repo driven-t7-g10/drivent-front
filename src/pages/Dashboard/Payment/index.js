@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import useToken from '../../../hooks/useToken';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { TicketButton } from '../../../components/Payment/TicketButton';
+import { TicketButton } from '../../../components/Dashboard/Payment/TicketButton';
 
 export default function Payment() {
   const [presentialCollor, setPresentialCollor] = useState('white');
@@ -36,8 +36,7 @@ export default function Payment() {
           Authorization: 'Bearer ' + token,
         }
       })
-      .then((response) => navigate('/dashboard/payment/data'))
-      .catch();
+      .then((response) => navigate('/dashboard/payment/data'));
   }, []);
   if (ticketTypes.length === 0) return null;
 
