@@ -25,6 +25,10 @@ export default function Hotel() {
     });
   }, []);
 
+  if (hotelsList.length === 0) return null;
+
+  console.log('hotel: ', hotelsList);
+
   useEffect(() => {
     axios
       .get('http://localhost:4000/tickets', {

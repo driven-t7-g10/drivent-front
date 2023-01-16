@@ -16,6 +16,8 @@ export default function Hotel_Options({ name, id, setShowRooms, rooms, setRooms,
       });
     }, []);
   });
+
+  console.log('booking: ', booking);
   function showRooms(id) {
     console.log(`cliquei no ${id}`);
     // aqui pode ser feita a mudança de cor
