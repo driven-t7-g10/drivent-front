@@ -1,9 +1,7 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import useToken from '../../../hooks/useToken';
 
-export default function Hotel({ name, rooms, setRooms, image }) {
+export default function Hotel({ name, rooms, setRooms, image, setChoosenHotelId, id }) {
   const token = useToken();
   
   let vacancies = 0;
@@ -31,7 +29,7 @@ export default function Hotel({ name, rooms, setRooms, image }) {
 
   return (
     <>
-      <Container onClick={() => setRooms(rooms)}>
+      <Container onClick={() => {setRooms(rooms); setChoosenHotelId(id); }}>
         <img src={image} alt='' />
         <h3>{name}</h3>
         <div>

@@ -1,6 +1,3 @@
-import { green } from '@material-ui/core/colors';
-import { useRef } from 'react';
-import { useState } from 'react';
 import styled from 'styled-components';
 
 export default function Room({ name, capacity, id, bookings, selectedRoom, setSelectedRoom }) {
@@ -27,7 +24,7 @@ export default function Room({ name, capacity, id, bookings, selectedRoom, setSe
         </div>
       </Container>
       :
-      <Container selected={selectedRoom === id} onClick={() => setSelectedRoom(id)}>
+      <Container selected={selectedRoom === id} onClick={() => setSelectedRoom(id) }>
         <span>{name}</span>
         <div>
           {spots.map((spot, index) => {

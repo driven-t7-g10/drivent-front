@@ -6,6 +6,7 @@ import useToken from '../../../hooks/useToken';
 import Hotels from '../../../components/Dashboard/Hotel/Hotels';
 import Rooms from '../../../components/Dashboard/Hotel/Rooms';
 import { useNavigate } from 'react-router-dom';
+import { ReservatedRoom } from './ReservatedRoom';
 
 export default function Hotel() {
   const token = useToken();
@@ -16,6 +17,12 @@ export default function Hotel() {
   const [selectedRoom, setSelectedRoom] = useState(0);
   const [isPaidTicket, setIsPaidTicket] = useState(true);
   const [isRightTicket, setIsRightTicket] = useState(true);
+  const [choosenHotelId, setChoosenHotelId] = useState(0);
+  const [choosenHotel, setChoosenHotel] = useState([]);
+  const [choosenRoom, setChoosenRoom] = useState([]);
+  const [showReservation, setShowRervation] = useState(true);
+  const [booking, setBooking] = useState([]);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     axios.get('http://localhost:4000/hotels', {
@@ -61,37 +68,90 @@ export default function Hotel() {
     );
   };
 
-  async function postBooking(selectedRoom) {
-    await axios.post('http://localhost:4000/booking', { roomId: selectedRoom }, {
+  console.log(selectedRoom);
+  console.log('count', count);
+
+  async function postBooking(selectedRoom, booking) {
+    if(count === 0 ) {
+      console.log(count, 'inu no post');
+      await axios.post('http://localhost:4000/booking', { roomId: selectedRoom }, {
+        headers: {
+          Authorization: 'Bearer ' + token,
+        },
+      }).then((response) => {
+        setBooking(response.data);
+        const hotel = hotels.filter(value => value.id === choosenHotelId);
+        const rooms = hotel.map(value => value.Rooms);
+        const room = rooms[0].filter(value => value.id === selectedRoom);
+        setChoosenRoom(room);
+        setChoosenHotel(hotel);
+        setShowRervation(false);
+        setCount(1);
+      }).catch((error) => {
+        console.error(error);
+      });
+    } else {
+      console.log('booking', booking);
+      updateBooking(selectedRoom, booking);
+    }
+  };
+
+  async function updateBooking(selectedRoom, booking) {
+    console.log('put');
+    await axios.put(`http://localhost:4000/booking/${booking.bookingId}`, { roomId: selectedRoom }, {
       headers: {
         Authorization: 'Bearer ' + token,
       },
     }).then((response) => {
-      navigate('/dashboard/activities');
+      console.log(response.data);
+      const hotel = hotels.filter(value => value.id === choosenHotelId);
+      const rooms = hotel.map(value => value.Rooms);
+      const room = rooms[0].filter(value => value.id === selectedRoom);
+      setChoosenRoom(room);
+      setChoosenHotel(hotel);
+      setShowRervation(false);
     }).catch((error) => {
       console.error(error);
     });
-  };
+  }
 
   return (
     <Container available>
       <h1>Escolha de hotel e quarto</h1>
-      <ChooseText>Primeiro, escolha seu hotel</ChooseText>
-      <Hotels
-        hotels={hotels}
-        setRooms={setRooms}
-      />
-      {rooms.length === 0 ? '' :
+      {showReservation ? 
         <>
-          <ChooseText>Ótima pedida! Agora escolha seu quarto:</ChooseText>
-          <Rooms
-            rooms={rooms}
-            selectedRoom={selectedRoom}
-            setSelectedRoom={setSelectedRoom}
+          <ChooseText>Primeiro, escolha seu hotel</ChooseText>
+          <Hotels
+            hotels={hotels}
+            setRooms={setRooms}
+            setChoosenHotelId={setChoosenHotelId}
           />
-          <Reservation onClick={() => postBooking(selectedRoom)}>RESERVAR QUARTO</Reservation>
+          {rooms.length === 0 ? '' :
+            <>
+              <ChooseText>Ótima pedida! Agora escolha seu quarto:</ChooseText>
+              <Rooms
+                rooms={rooms}
+                selectedRoom={selectedRoom}
+                setSelectedRoom={setSelectedRoom}
+                setCount={setCount}
+              />
+              <ReservationButton onClick={() => postBooking(selectedRoom, booking)}>RESERVAR QUARTO</ReservationButton>
+            </>
+          }     
         </>
-      }
+        :
+        <>
+          <ChooseText>Você já escolheu seu quarto:</ChooseText>
+          {choosenHotel.map((hotel, index) => (
+            <ReservatedRoom
+              key={index}
+              name={hotel.name}
+              image={hotel.image}
+              choosenRoom={choosenRoom}
+            />
+          ))}
+          <UpdateReservationButton onClick={() => { setShowRervation(true); }}>TROCAR DE QUARTO</UpdateReservationButton>
+        </>}
     </Container>
   );
 };
@@ -110,7 +170,25 @@ const Container = styled.div`
     color: #000000;
  }
  `;
-const Reservation = styled.button`
+const UpdateReservationButton = styled.button`
+width: 182px;
+height: 37px;
+background: #E0E0E0;
+box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+border-radius: 4px;
+margin-top: 20px;
+border: none;
+font-family: 'Roboto';
+font-size: 14px;
+text-align: center;
+color: #000000;
+
+:hover {
+ cursor: pointer;
+} 
+`;
+
+const ReservationButton = styled.button`
 width: 182px;
 height: 37px;
 background: #E0E0E0;
